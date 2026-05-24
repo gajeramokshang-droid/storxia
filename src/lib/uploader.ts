@@ -23,11 +23,11 @@ export async function ensureFolderPath(userId: string, relDir: string): Promise<
     const { data: existing } = await supabase
       .from("folders").select("id").eq("user_id", userId).eq("path", path).maybeSingle();
     if (existing) { parentId = existing.id; continue; }
-    const { data: inserted, error } = await supabase
+    const ins = await supabase
       .from("folders").insert({ user_id: userId, name, parent_id: parentId, path })
       .select("id").single();
-    if (error) throw error;
-    parentId = inserted.id;
+    if (ins.error) throw ins.error;
+    parentId = (ins.data as { id: string }).id;
   }
   return parentId;
 }
